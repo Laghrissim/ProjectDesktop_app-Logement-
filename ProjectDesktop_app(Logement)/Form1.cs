@@ -57,7 +57,7 @@ namespace ProjectDesktop_app_Logement_
                     MessageBox.Show("Connexion réussie!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     // Open the next form if the authentication is successful
-                    Form3 form3 = new Form3();
+                    Form3 form3 = new Form3(result);
                     Hide();
                     form3.Show();
                 }
@@ -65,9 +65,7 @@ namespace ProjectDesktop_app_Logement_
                 {
                     // Display an error message if the authentication fails
                     MessageBox.Show("Authentication failed. Please check your email and password and try again.");
-                    Form3 form3 = new Form3();
-                    Hide();
-                    form3.Show();
+                    
                 }
             }
         }
@@ -99,6 +97,13 @@ namespace ProjectDesktop_app_Logement_
         {
             pictureBox1.Image = Properties.Resources.normalImage;
             pictureBox1.Cursor = Cursors.Default;
+        }
+
+        private void bunifuThinButton22_Click(object sender, EventArgs e)
+        {
+            Form4 form4 = new Form4();
+            Hide();
+            form4.Show();
         }
     }
 }

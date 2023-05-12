@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form2));
             this.bunifuThinButton23 = new Bunifu.Framework.UI.BunifuThinButton2();
             this.bunifuCustomLabel5 = new Bunifu.Framework.UI.BunifuCustomLabel();
@@ -46,6 +47,7 @@
             this.guna2TextBox4 = new Guna.UI2.WinForms.Guna2TextBox();
             this.bunifuCustomLabel6 = new Bunifu.Framework.UI.BunifuCustomLabel();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.guna2BorderlessForm1 = new Guna.UI2.WinForms.Guna2BorderlessForm(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -84,6 +86,7 @@
             this.bunifuCustomLabel5.Size = new System.Drawing.Size(45, 16);
             this.bunifuCustomLabel5.TabIndex = 37;
             this.bunifuCustomLabel5.Text = "Image";
+            this.bunifuCustomLabel5.Click += new System.EventHandler(this.bunifuCustomLabel5_Click);
             // 
             // bunifuDropdown1
             // 
@@ -100,6 +103,7 @@
             this.bunifuDropdown1.selectedIndex = -1;
             this.bunifuDropdown1.Size = new System.Drawing.Size(370, 43);
             this.bunifuDropdown1.TabIndex = 35;
+            this.bunifuDropdown1.onItemSelected += new System.EventHandler(this.bunifuDropdown1_onItemSelected);
             // 
             // bunifuCustomLabel3
             // 
@@ -109,6 +113,7 @@
             this.bunifuCustomLabel3.Size = new System.Drawing.Size(75, 16);
             this.bunifuCustomLabel3.TabIndex = 34;
             this.bunifuCustomLabel3.Text = "Prix par nuit";
+            this.bunifuCustomLabel3.Click += new System.EventHandler(this.bunifuCustomLabel3_Click);
             // 
             // bunifuCustomLabel4
             // 
@@ -150,6 +155,7 @@
             this.bunifuCustomLabel2.Size = new System.Drawing.Size(73, 16);
             this.bunifuCustomLabel2.TabIndex = 28;
             this.bunifuCustomLabel2.Text = "Categories";
+            this.bunifuCustomLabel2.Click += new System.EventHandler(this.bunifuCustomLabel2_Click);
             // 
             // bunifuCustomLabel1
             // 
@@ -270,6 +276,7 @@
             this.guna2TextBox3.SelectedText = "";
             this.guna2TextBox3.Size = new System.Drawing.Size(350, 39);
             this.guna2TextBox3.TabIndex = 47;
+            this.guna2TextBox3.TextChanged += new System.EventHandler(this.guna2TextBox3_TextChanged);
             // 
             // guna2TextBox4
             // 
@@ -305,6 +312,12 @@
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
+            // guna2BorderlessForm1
+            // 
+            this.guna2BorderlessForm1.ContainerControl = this;
+            this.guna2BorderlessForm1.DockIndicatorTransparencyValue = 0.6D;
+            this.guna2BorderlessForm1.TransparentWhileDrag = true;
+            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -332,6 +345,7 @@
             this.Name = "Form2";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form2";
+            this.Load += new System.EventHandler(this.Form2_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
@@ -358,5 +372,6 @@
         private Guna.UI2.WinForms.Guna2TextBox guna2TextBox4;
         private Bunifu.Framework.UI.BunifuCustomLabel bunifuCustomLabel6;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private Guna.UI2.WinForms.Guna2BorderlessForm guna2BorderlessForm1;
     }
 }

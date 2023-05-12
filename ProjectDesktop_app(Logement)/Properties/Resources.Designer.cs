@@ -63,6 +63,16 @@ namespace ProjectDesktop_app_Logement_.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_user_50 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-user-50", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap imageHover {
             get {
                 object obj = ResourceManager.GetObject("imageHover", resourceCulture);
@@ -76,6 +86,16 @@ namespace ProjectDesktop_app_Logement_.Properties {
         internal static System.Drawing.Bitmap normalImage {
             get {
                 object obj = ResourceManager.GetObject("normalImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap user_2935527 {
+            get {
+                object obj = ResourceManager.GetObject("user-2935527", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

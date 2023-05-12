@@ -31,16 +31,16 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.bunifuCustomLabel3 = new Bunifu.Framework.UI.BunifuCustomLabel();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.bunifuCustomLabel2 = new Bunifu.Framework.UI.BunifuCustomLabel();
             this.bunifuCustomLabel1 = new Bunifu.Framework.UI.BunifuCustomLabel();
-            this.bunifuThinButton22 = new Bunifu.Framework.UI.BunifuThinButton2();
-            this.Seconnecter = new Bunifu.Framework.UI.BunifuThinButton2();
             this.bunifuElipse1 = new Bunifu.Framework.UI.BunifuElipse(this.components);
             this.email = new Guna.UI2.WinForms.Guna2TextBox();
             this.Password = new Guna.UI2.WinForms.Guna2TextBox();
             this.guna2MessageDialog1 = new Guna.UI2.WinForms.Guna2MessageDialog();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.bunifuThinButton22 = new Bunifu.Framework.UI.BunifuThinButton2();
+            this.Seconnecter = new Bunifu.Framework.UI.BunifuThinButton2();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -54,29 +54,6 @@
             this.bunifuCustomLabel3.Size = new System.Drawing.Size(126, 41);
             this.bunifuCustomLabel3.TabIndex = 43;
             this.bunifuCustomLabel3.Text = "SeLoger";
-            // 
-            // pictureBox2
-            // 
-            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
-            this.pictureBox2.Location = new System.Drawing.Point(499, 79);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(54, 50);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox2.TabIndex = 42;
-            this.pictureBox2.TabStop = false;
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(660, 13);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(54, 50);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 41;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
-            this.pictureBox1.MouseEnter += new System.EventHandler(this.pictureBox1_MouseEnter);
-            this.pictureBox1.MouseLeave += new System.EventHandler(this.pictureBox1_MouseLeave);
             // 
             // bunifuCustomLabel2
             // 
@@ -95,57 +72,6 @@
             this.bunifuCustomLabel1.Size = new System.Drawing.Size(106, 16);
             this.bunifuCustomLabel1.TabIndex = 39;
             this.bunifuCustomLabel1.Text = "Nom d\'utilisateur";
-            // 
-            // bunifuThinButton22
-            // 
-            this.bunifuThinButton22.ActiveBorderThickness = 1;
-            this.bunifuThinButton22.ActiveCornerRadius = 20;
-            this.bunifuThinButton22.ActiveFillColor = System.Drawing.Color.SeaGreen;
-            this.bunifuThinButton22.ActiveForecolor = System.Drawing.Color.WhiteSmoke;
-            this.bunifuThinButton22.ActiveLineColor = System.Drawing.Color.SeaGreen;
-            this.bunifuThinButton22.BackColor = System.Drawing.Color.White;
-            this.bunifuThinButton22.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("bunifuThinButton22.BackgroundImage")));
-            this.bunifuThinButton22.ButtonText = "Admin";
-            this.bunifuThinButton22.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.bunifuThinButton22.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bunifuThinButton22.ForeColor = System.Drawing.Color.SeaGreen;
-            this.bunifuThinButton22.IdleBorderThickness = 1;
-            this.bunifuThinButton22.IdleCornerRadius = 20;
-            this.bunifuThinButton22.IdleFillColor = System.Drawing.Color.White;
-            this.bunifuThinButton22.IdleForecolor = System.Drawing.Color.DeepPink;
-            this.bunifuThinButton22.IdleLineColor = System.Drawing.Color.DeepPink;
-            this.bunifuThinButton22.Location = new System.Drawing.Point(363, 294);
-            this.bunifuThinButton22.Margin = new System.Windows.Forms.Padding(5);
-            this.bunifuThinButton22.Name = "bunifuThinButton22";
-            this.bunifuThinButton22.Size = new System.Drawing.Size(104, 73);
-            this.bunifuThinButton22.TabIndex = 36;
-            this.bunifuThinButton22.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // Seconnecter
-            // 
-            this.Seconnecter.ActiveBorderThickness = 1;
-            this.Seconnecter.ActiveCornerRadius = 20;
-            this.Seconnecter.ActiveFillColor = System.Drawing.Color.SeaGreen;
-            this.Seconnecter.ActiveForecolor = System.Drawing.Color.White;
-            this.Seconnecter.ActiveLineColor = System.Drawing.Color.SeaGreen;
-            this.Seconnecter.BackColor = System.Drawing.Color.White;
-            this.Seconnecter.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("Seconnecter.BackgroundImage")));
-            this.Seconnecter.ButtonText = "Se connecter";
-            this.Seconnecter.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.Seconnecter.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Seconnecter.ForeColor = System.Drawing.Color.SeaGreen;
-            this.Seconnecter.IdleBorderThickness = 1;
-            this.Seconnecter.IdleCornerRadius = 20;
-            this.Seconnecter.IdleFillColor = System.Drawing.Color.DeepPink;
-            this.Seconnecter.IdleForecolor = System.Drawing.Color.White;
-            this.Seconnecter.IdleLineColor = System.Drawing.Color.DeepPink;
-            this.Seconnecter.Location = new System.Drawing.Point(185, 294);
-            this.Seconnecter.Margin = new System.Windows.Forms.Padding(5);
-            this.Seconnecter.Name = "Seconnecter";
-            this.Seconnecter.Size = new System.Drawing.Size(168, 73);
-            this.Seconnecter.TabIndex = 35;
-            this.Seconnecter.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.Seconnecter.Click += new System.EventHandler(this.Seconnecter_Click);
             // 
             // bunifuElipse1
             // 
@@ -203,6 +129,81 @@
             this.guna2MessageDialog1.Parent = null;
             this.guna2MessageDialog1.Style = Guna.UI2.WinForms.MessageDialogStyle.Default;
             this.guna2MessageDialog1.Text = null;
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
+            this.pictureBox2.Location = new System.Drawing.Point(499, 79);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(54, 50);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox2.TabIndex = 42;
+            this.pictureBox2.TabStop = false;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(660, 13);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(54, 50);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 41;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            this.pictureBox1.MouseEnter += new System.EventHandler(this.pictureBox1_MouseEnter);
+            this.pictureBox1.MouseLeave += new System.EventHandler(this.pictureBox1_MouseLeave);
+            // 
+            // bunifuThinButton22
+            // 
+            this.bunifuThinButton22.ActiveBorderThickness = 1;
+            this.bunifuThinButton22.ActiveCornerRadius = 20;
+            this.bunifuThinButton22.ActiveFillColor = System.Drawing.Color.DeepPink;
+            this.bunifuThinButton22.ActiveForecolor = System.Drawing.Color.White;
+            this.bunifuThinButton22.ActiveLineColor = System.Drawing.Color.DeepPink;
+            this.bunifuThinButton22.BackColor = System.Drawing.Color.White;
+            this.bunifuThinButton22.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("bunifuThinButton22.BackgroundImage")));
+            this.bunifuThinButton22.ButtonText = "S\'inscrire";
+            this.bunifuThinButton22.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.bunifuThinButton22.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.bunifuThinButton22.ForeColor = System.Drawing.Color.SeaGreen;
+            this.bunifuThinButton22.IdleBorderThickness = 1;
+            this.bunifuThinButton22.IdleCornerRadius = 20;
+            this.bunifuThinButton22.IdleFillColor = System.Drawing.Color.White;
+            this.bunifuThinButton22.IdleForecolor = System.Drawing.Color.DeepPink;
+            this.bunifuThinButton22.IdleLineColor = System.Drawing.Color.DeepPink;
+            this.bunifuThinButton22.Location = new System.Drawing.Point(363, 294);
+            this.bunifuThinButton22.Margin = new System.Windows.Forms.Padding(5);
+            this.bunifuThinButton22.Name = "bunifuThinButton22";
+            this.bunifuThinButton22.Size = new System.Drawing.Size(127, 73);
+            this.bunifuThinButton22.TabIndex = 36;
+            this.bunifuThinButton22.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.bunifuThinButton22.Click += new System.EventHandler(this.bunifuThinButton22_Click);
+            // 
+            // Seconnecter
+            // 
+            this.Seconnecter.ActiveBorderThickness = 1;
+            this.Seconnecter.ActiveCornerRadius = 20;
+            this.Seconnecter.ActiveFillColor = System.Drawing.Color.White;
+            this.Seconnecter.ActiveForecolor = System.Drawing.Color.DeepPink;
+            this.Seconnecter.ActiveLineColor = System.Drawing.Color.White;
+            this.Seconnecter.BackColor = System.Drawing.Color.White;
+            this.Seconnecter.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("Seconnecter.BackgroundImage")));
+            this.Seconnecter.ButtonText = "Se connecter";
+            this.Seconnecter.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.Seconnecter.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Seconnecter.ForeColor = System.Drawing.Color.SeaGreen;
+            this.Seconnecter.IdleBorderThickness = 1;
+            this.Seconnecter.IdleCornerRadius = 20;
+            this.Seconnecter.IdleFillColor = System.Drawing.Color.DeepPink;
+            this.Seconnecter.IdleForecolor = System.Drawing.Color.White;
+            this.Seconnecter.IdleLineColor = System.Drawing.Color.DeepPink;
+            this.Seconnecter.Location = new System.Drawing.Point(185, 294);
+            this.Seconnecter.Margin = new System.Windows.Forms.Padding(5);
+            this.Seconnecter.Name = "Seconnecter";
+            this.Seconnecter.Size = new System.Drawing.Size(168, 73);
+            this.Seconnecter.TabIndex = 35;
+            this.Seconnecter.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.Seconnecter.Click += new System.EventHandler(this.Seconnecter_Click);
             // 
             // Form1
             // 
