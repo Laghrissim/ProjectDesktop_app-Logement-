@@ -24,6 +24,8 @@ using System.Reflection;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using MongoDB.Bson;
+using SixLabors.ImageSharp.PixelFormats;
+using System.Net;
 
 namespace ProjectDesktop_app_Logement_
 {
@@ -33,10 +35,12 @@ namespace ProjectDesktop_app_Logement_
     {   private readonly IConfiguration _configuration;
         private string selectedImagePath = "C:/Users/HP/OneDrive/Bureau/Videos .Net/imagescrypto/big-house-13.png";
         private string token;
+        private Listing list= new Listing();
+        private bool modify=false;
         public Form5()
         {
             InitializeComponent();
-
+            
         }
         public Form5(string token)
         {
@@ -44,6 +48,46 @@ namespace ProjectDesktop_app_Logement_
             this.token = token;
         }
 
+        public Form5(Listing list, string token)
+        {
+           
+            InitializeComponent();
+            this.list = list;
+            modify = true;
+            bunifuDropdown1.selectedIndex = 0;
+            bunifuDropdown2.selectedIndex = 0;
+            bunifuDropdown3.selectedIndex = 0;
+            bunifuDropdown4.selectedIndex = 0;
+            guna2TextBox1.Text = list.title;
+            guna2TextBox2.Text=list.description;
+            guna2TextBox3.Text = list.price.ToString();
+            guna2TextBox4.Text = list.locationValue;
+            bunifuCustomLabel5.Text = "Modifier Offre";
+            bunifuThinButton21.ButtonText = "Modifier";
+            this.token = token;
+            using (WebClient webClient = new WebClient())
+            {
+                byte[] imageData = webClient.DownloadData(list.imageSrc);
+
+                // Load the webp image using ImageSharp
+                using (MemoryStream memoryStream = new MemoryStream(imageData))
+                {
+                    using (SixLabors.ImageSharp.Image<Rgba32> image = SixLabors.ImageSharp.Image.Load<Rgba32>(memoryStream.ToArray()))
+                    {
+                        // Convert ImageSharp image to System.Drawing.Image
+                        using (var memoryStream2 = new MemoryStream())
+                        {
+                            image.Save(memoryStream2, new SixLabors.ImageSharp.Formats.Png.PngEncoder());
+
+                            System.Drawing.Image convertedImage = System.Drawing.Image.FromStream(memoryStream2);
+
+                            // Set the image in the PictureBox
+                            guna2PictureBox1.Image = convertedImage;
+                        }
+                    }
+                }
+            }
+        }
 
 
 
@@ -129,7 +173,7 @@ namespace ProjectDesktop_app_Logement_
 
         private void bunifuThinButton22_Click(object sender, EventArgs e)
         {
-            Form3 form3 = new Form3();
+            Form3 form3 = new Form3(token);
             Hide();
             form3.Show();
         }
@@ -152,7 +196,7 @@ namespace ProjectDesktop_app_Logement_
 
         private void bunifuCustomLabel6_Click(object sender, EventArgs e)
         {
-            Form3 form3 = new Form3();
+            Form3 form3 = new Form3(token);
             Hide();
             form3.Show();
         }
@@ -160,7 +204,7 @@ namespace ProjectDesktop_app_Logement_
         private void bunifuThinButton22_Click_1(object sender, EventArgs e)
         {
 
-            Form3 form3 = new Form3();
+            Form3 form3 = new Form3(token);
             Hide();
             form3.Show();
 
@@ -179,14 +223,14 @@ namespace ProjectDesktop_app_Logement_
             string guestCount = bunifuDropdown4.selectedValue.ToString();
             // Replace with the actual path
             string locationText = guna2TextBox4.Text;
-            byte[] userImageBytes = null;
-            using (FileStream fileStream = new FileStream(selectedImagePath, FileMode.Open, FileAccess.Read))
-            {
-                using (BinaryReader reader = new BinaryReader(fileStream))
-                {
-                    userImageBytes = reader.ReadBytes((int)fileStream.Length);
-                }
-            }
+           
+
+
+
+
+
+
+
 
 
 
@@ -237,7 +281,7 @@ namespace ProjectDesktop_app_Logement_
                 
                 title = titleText,
                 description = descriptionText,
-                imageSrc = Convert.ToBase64String(userImageBytes),
+                imageSrc = selectedImagePath,
                 createdAt = DateTime.Now,
                 category = categoryText,
                 bathroomCount = bathroomCountText,
@@ -248,9 +292,7 @@ namespace ProjectDesktop_app_Logement_
                 price = prixText,
                 
             };
-
-
-
+           
 
             // Serialize the payload to a JSON string
             string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
@@ -259,41 +301,102 @@ namespace ProjectDesktop_app_Logement_
             using (HttpClient client = new HttpClient())
             {
                 // Define the API endpoint URL
-                string url = "https://localhost:7194/Listings";
-
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
-
-                // Create a new StringContent object with the JSON string and the "application/json" media type
-                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-                try
-                {
-                    // Send the POST request to the API endpoint
-                    HttpResponseMessage response = await client.PostAsync(url, content);
-
-                    // Check if the response was successful
-                    if (response.IsSuccessStatusCode)
-                    {
-                        // Offer added successfully
-                        // You can handle the success case here
-                        MessageBox.Show("Ajout réussie!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        // Offer addition failed
-                        // You can handle the failure case here
-                        string errorMessage = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine(errorMessage);
-                        Console.Write(errorMessage);
-                        MessageBox.Show("Failed to add offer. Error: " + errorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
                 
-                }
-                catch (Exception ex)
+
+                if (modify)
                 {
-                    // Exception occurred during the request
-                    // You can handle the exception case here
-                    Console.WriteLine("Error: " + ex.Message);
+                    
+                    JObject listingIdObject = list.id as JObject;
+
+
+                    int timestamp = listingIdObject.Value<int>("timestamp");
+                    int machine = listingIdObject.Value<int>("machine");
+                    short pid = (short)listingIdObject.Value<int>("pid");
+                    int increment = listingIdObject.Value<int>("increment");
+
+                    ObjectId objectId = new ObjectId(timestamp, machine, pid, increment);
+                    string objectIdString = objectId.ToString();
+                    string url = $"https://localhost:7194/Listings/{objectIdString}";
+
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+
+                    // Create a new StringContent object with the JSON string and the "application/json" media type
+                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                    try
+                    {
+                        // Send the POST request to the API endpoint
+
+
+                        HttpResponseMessage response = await client.PutAsync(url, content);
+
+
+                        // Check if the response was successful
+                        if (response.IsSuccessStatusCode)
+                        {
+                            // Offer added successfully
+                            // You can handle the success case here
+                            MessageBox.Show("Modification réussie!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            // Offer addition failed
+                            // You can handle the failure case here
+                            string errorMessage = await response.Content.ReadAsStringAsync();
+                            Console.WriteLine(errorMessage);
+                            Console.Write(errorMessage);
+                            MessageBox.Show("Failed to add offer. Error: " + errorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        // Exception occurred during the request
+                        // You can handle the exception case here
+                        Console.WriteLine("Error: " + ex.Message);
+                    }
+                }
+
+                else
+                {
+                    string url = "https://localhost:7194/Listings";
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+
+                    // Create a new StringContent object with the JSON string and the "application/json" media type
+                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                    try
+                    {
+                        // Send the POST request to the API endpoint
+
+
+                        HttpResponseMessage response = await client.PostAsync(url, content);
+
+
+                        // Check if the response was successful
+                        if (response.IsSuccessStatusCode)
+                        {
+                            // Offer added successfully
+                            // You can handle the success case here
+                            MessageBox.Show("Ajout réussie!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            // Offer addition failed
+                            // You can handle the failure case here
+                            string errorMessage = await response.Content.ReadAsStringAsync();
+                            Console.WriteLine(errorMessage);
+                            Console.Write(errorMessage);
+                            MessageBox.Show("Failed to add offer. Error: " + errorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        // Exception occurred during the request
+                        // You can handle the exception case here
+                        Console.WriteLine("Error: " + ex.Message);
+                    }
                 }
             }
         }

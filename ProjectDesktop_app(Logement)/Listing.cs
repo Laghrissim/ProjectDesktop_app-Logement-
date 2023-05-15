@@ -8,7 +8,7 @@ using MongoDB.Bson;
 
 namespace ProjectDesktop_app_Logement_
 {
-    internal class Listing
+       public class Listing
 
     {
         public JObject id { get; set; }

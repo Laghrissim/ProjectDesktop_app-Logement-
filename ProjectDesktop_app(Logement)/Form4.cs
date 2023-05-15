@@ -75,8 +75,12 @@ namespace ProjectDesktop_app_Logement_
             string name = guna2TextBox1.Text; // Replace with the actual name
             string email = guna2TextBox2.Text; // Replace with the actual email
             string password=guna2TextBox3.Text; // Replace with the actual password
+            string fileName = Path.GetFileName(selectedImagePath); // Get the file name from the path
+            string directory = Directory.GetCurrentDirectory(); // Get the current working directory
+            string relativePath = Path.Combine(directory, fileName); // Combine the directory and file name to create a relative path
+
             byte[] userImageBytes = null;
-            using (FileStream fileStream = new FileStream(selectedImagePath, FileMode.Open, FileAccess.Read))
+            using (FileStream fileStream = new FileStream(relativePath, FileMode.Open, FileAccess.Read))
             {
                 using (BinaryReader reader = new BinaryReader(fileStream))
                 {
@@ -84,8 +88,15 @@ namespace ProjectDesktop_app_Logement_
                 }
             }
 
-            // Create the request payload as an anonymous object
-            var payload = new
+
+
+
+
+
+
+
+                        // Create the request payload as an anonymous object
+                        var payload = new
             {
                 name = name,
                 email = email,

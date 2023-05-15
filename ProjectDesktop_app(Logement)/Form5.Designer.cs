@@ -113,7 +113,7 @@
             this.panel1.Controls.Add(this.bunifuThinButton21);
             this.panel1.Location = new System.Drawing.Point(62, 84);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(703, 665);
+            this.panel1.Size = new System.Drawing.Size(703, 793);
             this.panel1.TabIndex = 81;
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
             // 
@@ -522,7 +522,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(821, 761);
+            this.ClientSize = new System.Drawing.Size(821, 841);
             this.ControlBox = false;
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.bunifuCustomLabel6);

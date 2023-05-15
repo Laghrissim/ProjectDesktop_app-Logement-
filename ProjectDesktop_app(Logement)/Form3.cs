@@ -48,7 +48,7 @@ namespace ProjectDesktop_app_Logement_
         private object contentPanel1;
 
         private string result;
-
+        
         public Form3(string result)
         {
             InitializeComponent();
@@ -476,13 +476,19 @@ namespace ProjectDesktop_app_Logement_
                 BunifuThinButton2 addToFavoritesButton = new BunifuThinButton2();
 
                 addToFavoritesButton.ButtonText = "Modifier";
-                addToFavoritesButton.Width = 100;
+                addToFavoritesButton.Width = 270;
                 addToFavoritesButton.IdleFillColor = Color.White;
                 addToFavoritesButton.IdleForecolor = Color.DeepPink;
                 addToFavoritesButton.IdleLineColor = Color.White;
+
+
+
+                addToFavoritesButton.ActiveFillColor = Color.Green;
+                addToFavoritesButton.ActiveForecolor = Color.White;
+                addToFavoritesButton.ActiveLineColor = Color.Green;
                 addToFavoritesButton.Location = new System.Drawing.Point(10, 40);
                 addToFavoritesButton.Tag = listing.id;
-                addToFavoritesButton.Click += (sender, e) => Modifier_Click(sender, e, addToFavoritesButton);
+                addToFavoritesButton.Click += (sender, e) => Modifier_Click(sender, e, listing, card, contentPanel);
 
                 contentPanel.Controls.Add(addToFavoritesButton, 0, 6);
 
@@ -493,15 +499,19 @@ namespace ProjectDesktop_app_Logement_
                 reservationButton.IdleLineColor = Color.White;
                 reservationButton.IdleForecolor = Color.DeepPink;
                 reservationButton.IdleFillColor = Color.White;
+
+                reservationButton.ActiveLineColor = Color.Red;
+                reservationButton.ActiveForecolor = Color.White;
+                reservationButton.ActiveFillColor = Color.Red;
                 reservationButton.Location = new System.Drawing.Point(10, 70);
                 reservationButton.Click += (sender, e) => Supprimer_Click(sender, e, listing, card, contentPanel);
-                contentPanel.Controls.Add(reservationButton, 1, 6);
+                contentPanel.Controls.Add(reservationButton, 0, 7);
 
 
 
 
                 // Adjust the height of the card based on the last control's bottom position
-                card.Height = addressLabel.Bottom + 10;
+                card.Height = reservationButton.Bottom + 10;
 
                 // Add the card to the FlowLayoutPanel
                 flowLayoutPanel1.Controls.Add(card);
@@ -517,27 +527,84 @@ namespace ProjectDesktop_app_Logement_
                 }
             }
         }
-
+        
         // Modifier_Click event handler
-        private void Modifier_Click(object sender, EventArgs e, BunifuThinButton2 button)
+        private void Modifier_Click(object sender, EventArgs e, Listing listing, Bunifu.Framework.UI.BunifuCards parentCard, TableLayoutPanel contentPanel)
         {
-            string listingId = button.Tag.ToString();
-            // Perform the necessary operations to modify the listing using the PUT API (/Listings/{id})
-            // Use the listingId to identify the listing to be modified
-            // Implement your logic here
+            Form5 form3 = new Form5(listing,result);
+            Hide();
+            form3.Show();
         }
 
         // Supprimer_Click event handler
-        private void Supprimer_Click(object sender, EventArgs e, Listing listing, Bunifu.Framework.UI.BunifuCards card, TableLayoutPanel contentPanel)
+        private async void Supprimer_Click(object sender, EventArgs e, Listing listing, Bunifu.Framework.UI.BunifuCards card, TableLayoutPanel contentPanel)
         {
-            string listingId = (string)listing.id;
-            // Perform the necessary operations to delete the listing using the DELETE API (/Listings/{id})
-            // Use the listingId to identify the listing to be deleted
-            // Implement your logic here
+            if (listing != null)
+            {
+                var basePath = "C:/Users/HP/source/repos/ProjectDesktop_app(Logement)/ProjectDesktop_app(Logement)/";
+                // Inject IConfiguration into your class or retrieve it from the DI container
+                var configuration = new ConfigurationBuilder()
+          .SetBasePath(basePath)
+          .AddJsonFile("appsettings.json")
+          .Build();
+
+                // Retrieve the Jwt:Secret value from configuration
+                var jwtSecret = configuration["Jwt:Secret"];
+
+                // Use jwtSecret in your code
+                var key = Encoding.ASCII.GetBytes(jwtSecret);
+
+                string tokenJson = this.result;
+                JObject tokenObject = JObject.Parse(tokenJson);
+                string jwtToken = tokenObject.Value<string>("token");
+
+
+                JObject listingIdObject = listing.id as JObject;
+
+                int timestamp = listingIdObject.Value<int>("timestamp");
+                int machine = listingIdObject.Value<int>("machine");
+                short pid = (short)listingIdObject.Value<int>("pid");
+                int increment = listingIdObject.Value<int>("increment");
+
+                ObjectId objectId = new ObjectId(timestamp, machine, pid, increment);
+                string objectIdString = objectId.ToString();
+                string url = $"https://localhost:7194/Listings/{objectIdString}";
+
+                // Show a message box confirmation to delete the listing
+                DialogResult result = MessageBox.Show("Are you sure you want to delete this listing?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
+                {
+                    using (HttpClient client = new HttpClient())
+                    {
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+                        // Send the DELETE request
+                        HttpResponseMessage response = await client.DeleteAsync(url);
+
+                        // Check the response status
+                        if (response.IsSuccessStatusCode)
+                        {
+                            // Handle the success response
+                            MessageBox.Show("Listing deleted successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            contentPanel.Controls.Remove(card);
+                            card.Dispose();
+                        }
+                        else
+                        {
+                            // Handle the error response
+                            MessageBox.Show($"Error: {response.StatusCode}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+                else
+                {
+                    // Handle the cancellation or "No" response from the message box
+                    MessageBox.Show("Deletion canceled", "Canceled", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
 
             // Assuming successful deletion, remove the card from the UI
-            contentPanel.Controls.Remove(card);
-            card.Dispose();
+           
         }
        
 
@@ -712,7 +779,7 @@ namespace ProjectDesktop_app_Logement_
                             // Initialize the reservation button
                             BunifuThinButton2 reservationButton = new BunifuThinButton2();
                             reservationButton.Width = 270;
-                            reservationButton.ButtonText = "Make Reservation";
+                            reservationButton.ButtonText = "Denmande Reservation";
                             reservationButton.IdleLineColor = Color.DeepPink;
                             reservationButton.IdleForecolor = Color.DeepPink;
                             reservationButton.IdleFillColor = Color.White;
@@ -1187,12 +1254,12 @@ namespace ProjectDesktop_app_Logement_
             {
                 Id ="",
                 UserId="",
-                listingId = objectId,
+                listingId = objectId.ToString(),
                 startDate = startDate.Text,
                 endDate = endDate.Text,
                 createdAt = DateTime.UtcNow
             };
-            MessageBox.Show(listing.id.ToString(), "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            
             var basePath = "C:/Users/HP/source/repos/ProjectDesktop_app(Logement)/ProjectDesktop_app(Logement)/";
             var configuration = new ConfigurationBuilder()
     .SetBasePath(basePath)
