@@ -179,7 +179,16 @@ namespace ProjectDesktop_app_Logement_
             string guestCount = bunifuDropdown4.selectedValue.ToString();
             // Replace with the actual path
             string locationText = guna2TextBox4.Text;
-            
+            byte[] userImageBytes = null;
+            using (FileStream fileStream = new FileStream(selectedImagePath, FileMode.Open, FileAccess.Read))
+            {
+                using (BinaryReader reader = new BinaryReader(fileStream))
+                {
+                    userImageBytes = reader.ReadBytes((int)fileStream.Length);
+                }
+            }
+
+
 
             int roomCountText;
             int bathroomCountText;
@@ -228,7 +237,7 @@ namespace ProjectDesktop_app_Logement_
                 
                 title = titleText,
                 description = descriptionText,
-                imageSrc = selectedImagePath,
+                imageSrc = Convert.ToBase64String(userImageBytes),
                 createdAt = DateTime.Now,
                 category = categoryText,
                 bathroomCount = bathroomCountText,

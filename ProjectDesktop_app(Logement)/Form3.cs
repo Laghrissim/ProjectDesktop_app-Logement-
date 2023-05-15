@@ -1168,19 +1168,31 @@ namespace ProjectDesktop_app_Logement_
 
         private async void Button1_Click(object sender, EventArgs e,Listing listing, Guna2TextBox startDate, Guna2TextBox endDate)
         {
-            // Handle the button click event here
-            // You can perform actions or write code that will be executed when the button is clicked
+
+            JObject listingIdObject = listing.id as JObject;
+
+            
+                int timestamp = listingIdObject.Value<int>("timestamp");
+                int machine = listingIdObject.Value<int>("machine");
+                short pid = (short)listingIdObject.Value<int>("pid");
+                int increment = listingIdObject.Value<int>("increment");
+
+                ObjectId objectId = new ObjectId(timestamp, machine, pid, increment);
+                string objectIdString = objectId.ToString();
+
+                // Use the objectId or objectIdString as needed
+            
+
             var payload = new
             {
-                id = "string",
-                userId = "string",
-                listingId = listing.id,
+                Id ="",
+                UserId="",
+                listingId = objectId,
                 startDate = startDate.Text,
                 endDate = endDate.Text,
-                totalPrice = 0,
                 createdAt = DateTime.UtcNow
             };
-
+            MessageBox.Show(listing.id.ToString(), "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             var basePath = "C:/Users/HP/source/repos/ProjectDesktop_app(Logement)/ProjectDesktop_app(Logement)/";
             var configuration = new ConfigurationBuilder()
     .SetBasePath(basePath)
