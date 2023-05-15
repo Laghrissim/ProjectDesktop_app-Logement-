@@ -23,16 +23,31 @@ using Label = System.Windows.Forms.Label;
 using BorderStyle = System.Windows.Forms.BorderStyle;
 using System.Linq;
 using TextBox = System.Windows.Forms.TextBox;
+using MongoDB.Bson;
+using System.Net.Http;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
+using System.Configuration;
+using System.IO;
+using System.Reflection;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
+using Guna.UI2.WinForms;
+using System.Runtime.InteropServices;
+
 
 namespace ProjectDesktop_app_Logement_
 {
     
     public partial class Form3 : Form
     {
-        private string result;
-        private object contentPanel1;
+        private readonly IConfiguration _configuration;
         
+        private object contentPanel1;
 
+        private string result;
 
         public Form3(string result)
         {
@@ -94,7 +109,7 @@ namespace ProjectDesktop_app_Logement_
 
         // ...
 
-        private async Task<IEnumerable<Listing>> GetListings2()
+        private async Task<IEnumerable<Listing>> GetListings()
         {
             using (HttpClient client = new HttpClient())
             {
@@ -111,12 +126,33 @@ namespace ProjectDesktop_app_Logement_
             }
         }
 
-        private async Task<IEnumerable<Listing>> GetListings2(string token)
+        private async Task<IEnumerable<Listing>> GetListings2()
+
         {
+            var basePath = "C:/Users/HP/source/repos/ProjectDesktop_app(Logement)/ProjectDesktop_app(Logement)/";
+            // Inject IConfiguration into your class or retrieve it from the DI container
+                var configuration = new ConfigurationBuilder()
+          .SetBasePath(basePath)
+          .AddJsonFile("appsettings.json")
+          .Build();
+
+            // Retrieve the Jwt:Secret value from configuration
+            var jwtSecret = configuration["Jwt:Secret"];
+
+            // Use jwtSecret in your code
+            var key = Encoding.ASCII.GetBytes(jwtSecret);
+
+            string tokenJson = result;
+            JObject tokenObject = JObject.Parse(tokenJson);
+            string jwtToken = tokenObject.Value<string>("token");
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = tokenHandler.ReadJwtToken(jwtToken);
+            var userIdText = jwtSecurityToken.Claims.FirstOrDefault(c => c.Type == "unique_name")?.Value;
             using (HttpClient client = new HttpClient())
             {
                 string url = "https://localhost:7194/Listings/MesListings";
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {this.result}");
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {jwtToken}");
                 client.DefaultRequestHeaders.Add("accept", "application/json");
 
                 HttpResponseMessage response = await client.GetAsync(url);
@@ -132,7 +168,7 @@ namespace ProjectDesktop_app_Logement_
 
         private async Task PopulateListings()
         {
-            IEnumerable<Listing> listings = await GetListings2();
+            IEnumerable<Listing> listings = await GetListings();
             flowLayoutPanel1.Controls.Clear();
             foreach (Listing listing in listings)
             {
@@ -180,6 +216,8 @@ namespace ProjectDesktop_app_Logement_
 
                 pictureBox.Padding = new Padding(5);
                 contentPanel.Controls.Add(pictureBox, 0, 0); // Add to the first row
+
+                card.SizeChanged += Card_SizeChanged;
 
                 // Create a Label control for the title and set its properties
                 Label titleLabel = new Label();
@@ -252,24 +290,35 @@ namespace ProjectDesktop_app_Logement_
                 addressLabel.Font = new Font("Yu Gothic UI", 10); // Set the font
                 addressLabel.Padding = new Padding(5);
                 contentPanel.Controls.Add(addressLabel, 0,5); // Add to the fifth row
-                Button addToFavoritesButton;
-                 Button reservationButton;
-        addToFavoritesButton = new Button();
-                addToFavoritesButton.Text = "Add to Favorites";
-                addToFavoritesButton.Width= 100;
-                addToFavoritesButton.BackColor = Color.White;
-                addToFavoritesButton.ForeColor = Color.DeepPink;
+
+                BunifuThinButton2 addToFavoritesButton = new BunifuThinButton2();
+                addToFavoritesButton.ButtonText = "Add to Favorites";
+                addToFavoritesButton.Width= 270;
+                addToFavoritesButton.IdleFillColor = Color.White;
+                addToFavoritesButton.IdleForecolor = Color.DeepPink;
+                addToFavoritesButton.IdleLineColor = Color.DeepPink;
+
+                addToFavoritesButton.ActiveFillColor = Color.DeepPink;
+                addToFavoritesButton.ActiveForecolor = Color.White;
+                addToFavoritesButton.ActiveLineColor = Color.DeepPink;
                 addToFavoritesButton.Location = new System.Drawing.Point(10, 40);
                 addToFavoritesButton.Tag = listing.id;
                 addToFavoritesButton.Click += (sender, e) => AddToFavoritesButton_Click(sender, e, addToFavoritesButton);
                 contentPanel.Controls.Add(addToFavoritesButton,0,6);
 
                 // Initialize the reservation button
-                reservationButton = new Button();
+                BunifuThinButton2 reservationButton = new BunifuThinButton2();
                 reservationButton.Width = 270;
-                reservationButton.Text = "Make Reservation";
+                reservationButton.ButtonText = "Make Reservation";
+                reservationButton.IdleLineColor = Color.DeepPink;
+                reservationButton.IdleForecolor = Color.DeepPink;
+                reservationButton.IdleFillColor = Color.White;
+
+                reservationButton.ActiveLineColor = Color.DeepPink;
+                reservationButton.ActiveForecolor = Color.White;
+                reservationButton.ActiveFillColor = Color.DeepPink;
                 reservationButton.Location = new System.Drawing.Point(10, 70); // Adjust the location as needed
-                reservationButton.Click += (sender, e) => ReservationButton_Click(sender, e, addToFavoritesButton, listing);
+                reservationButton.Click += (sender, e) => ReservationButton_Click(sender, e, listing,card,contentPanel);
                 contentPanel.Controls.Add(reservationButton,0,7);
 
 
@@ -280,6 +329,16 @@ namespace ProjectDesktop_app_Logement_
 
                 // Add the card to the FlowLayoutPanel
                 flowLayoutPanel1.Controls.Add(card);
+                void Card_SizeChanged(object sender, EventArgs e)
+                {
+
+
+                    // Adjust the size of the PictureBox based on the card's size
+                    int pictureBoxWidth = card.Width; // Subtract the left and right margins
+                    int pictureBoxHeight = card.Height / 3; // Adjust the ratio as needed
+
+                    pictureBox.Size = new System.Drawing.Size(pictureBoxWidth, pictureBoxHeight);
+                }
 
             }
         }
@@ -310,6 +369,7 @@ namespace ProjectDesktop_app_Logement_
                 card.Controls.Add(contentPanel);
 
                 // Create a PictureBox control and set its properties
+                // Create a PictureBox control and set its properties
                 PictureBox pictureBox = new PictureBox();
                 pictureBox.Size = new System.Drawing.Size(300, 150); // Adjust the size as needed
                 pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -339,7 +399,7 @@ namespace ProjectDesktop_app_Logement_
 
 
                 pictureBox.Padding = new Padding(5);
-                contentPanel.Controls.Add(pictureBox, 0, 0); // Add to the first row
+                contentPanel.Controls.Add(pictureBox, 0, 0); //d to the first row
 
                 // Create a Label control for the title and set its properties
                 Label titleLabel = new Label();
@@ -412,36 +472,80 @@ namespace ProjectDesktop_app_Logement_
                 addressLabel.Font = new Font("Yu Gothic UI", 10); // Set the font
                 addressLabel.Padding = new Padding(5);
                 contentPanel.Controls.Add(addressLabel, 0, 5); // Add to the fifth row
-                Button addToFavoritesButton;
-                Button reservationButton;
-                addToFavoritesButton = new Button();
-                addToFavoritesButton.Text = "Add to Favorites";
+                BunifuThinButton2 reservationButton = new BunifuThinButton2();
+                BunifuThinButton2 addToFavoritesButton = new BunifuThinButton2();
+
+                addToFavoritesButton.ButtonText = "Modifier";
                 addToFavoritesButton.Width = 100;
-                addToFavoritesButton.BackColor = Color.White;
-                addToFavoritesButton.ForeColor = Color.DeepPink;
+                addToFavoritesButton.IdleFillColor = Color.White;
+                addToFavoritesButton.IdleForecolor = Color.DeepPink;
+                addToFavoritesButton.IdleLineColor = Color.White;
                 addToFavoritesButton.Location = new System.Drawing.Point(10, 40);
                 addToFavoritesButton.Tag = listing.id;
-                addToFavoritesButton.Click += (sender, e) => AddToFavoritesButton_Click(sender, e, addToFavoritesButton);
+                addToFavoritesButton.Click += (sender, e) => Modifier_Click(sender, e, addToFavoritesButton);
+
                 contentPanel.Controls.Add(addToFavoritesButton, 0, 6);
 
                 // Initialize the reservation button
-                reservationButton = new Button();
+
                 reservationButton.Width = 270;
-                reservationButton.Text = "Make Reservation";
-                reservationButton.Location = new System.Drawing.Point(10, 70); // Adjust the location as needed
-                reservationButton.Click += (sender, e) => ReservationButton_Click(sender, e, addToFavoritesButton, listing);
-                contentPanel.Controls.Add(reservationButton, 0, 7);
+                reservationButton.ButtonText = "Supprimer";
+                reservationButton.IdleLineColor = Color.White;
+                reservationButton.IdleForecolor = Color.DeepPink;
+                reservationButton.IdleFillColor = Color.White;
+                reservationButton.Location = new System.Drawing.Point(10, 70);
+                reservationButton.Click += (sender, e) => Supprimer_Click(sender, e, listing, card, contentPanel);
+                contentPanel.Controls.Add(reservationButton, 1, 6);
 
 
 
 
                 // Adjust the height of the card based on the last control's bottom position
-                card.Height = reservationButton.Bottom + 10;
+                card.Height = addressLabel.Bottom + 10;
 
                 // Add the card to the FlowLayoutPanel
                 flowLayoutPanel1.Controls.Add(card);
+                void Card_SizeChanged(object sender, EventArgs e)
+                {
+
+
+                    // Adjust the size of the PictureBox based on the card's size
+                    int pictureBoxWidth = card.Width; // Subtract the left and right margins
+                    int pictureBoxHeight = card.Height / 3; // Adjust the ratio as needed
+
+                    pictureBox.Size = new System.Drawing.Size(pictureBoxWidth, pictureBoxHeight);
+                }
             }
         }
+
+        // Modifier_Click event handler
+        private void Modifier_Click(object sender, EventArgs e, BunifuThinButton2 button)
+        {
+            string listingId = button.Tag.ToString();
+            // Perform the necessary operations to modify the listing using the PUT API (/Listings/{id})
+            // Use the listingId to identify the listing to be modified
+            // Implement your logic here
+        }
+
+        // Supprimer_Click event handler
+        private void Supprimer_Click(object sender, EventArgs e, Listing listing, Bunifu.Framework.UI.BunifuCards card, TableLayoutPanel contentPanel)
+        {
+            string listingId = (string)listing.id;
+            // Perform the necessary operations to delete the listing using the DELETE API (/Listings/{id})
+            // Use the listingId to identify the listing to be deleted
+            // Implement your logic here
+
+            // Assuming successful deletion, remove the card from the UI
+            contentPanel.Controls.Remove(card);
+            card.Dispose();
+        }
+       
+
+
+
+
+
+
 
 
 
@@ -516,6 +620,8 @@ namespace ProjectDesktop_app_Logement_
                             pictureBox.Padding = new Padding(5);
                             contentPanel.Controls.Add(pictureBox, 0, 0); // Add to the first row
 
+                            card.SizeChanged += Card_SizeChanged;
+
                             // Create a Label control for the title and set its properties
                             Label titleLabel = new Label();
                             titleLabel.Text = listing.title;
@@ -587,24 +693,35 @@ namespace ProjectDesktop_app_Logement_
                             addressLabel.Font = new Font("Yu Gothic UI", 10); // Set the font
                             addressLabel.Padding = new Padding(5);
                             contentPanel.Controls.Add(addressLabel, 0, 5); // Add to the fifth row
-                            Button addToFavoritesButton;
-                            Button reservationButton;
-                            addToFavoritesButton = new Button();
-                            addToFavoritesButton.Text = "Add to Favorites";
-                            addToFavoritesButton.Width = 100;
-                            addToFavoritesButton.BackColor = Color.White;
-                            addToFavoritesButton.ForeColor = Color.DeepPink;
+
+                            BunifuThinButton2 addToFavoritesButton = new BunifuThinButton2();
+                            addToFavoritesButton.ButtonText = "Add to Favorites";
+                            addToFavoritesButton.Width = 270;
+                            addToFavoritesButton.IdleFillColor = Color.White;
+                            addToFavoritesButton.IdleForecolor = Color.DeepPink;
+                            addToFavoritesButton.IdleLineColor = Color.DeepPink;
+
+                            addToFavoritesButton.ActiveFillColor = Color.DeepPink;
+                            addToFavoritesButton.ActiveForecolor = Color.White;
+                            addToFavoritesButton.ActiveLineColor = Color.DeepPink;
                             addToFavoritesButton.Location = new System.Drawing.Point(10, 40);
                             addToFavoritesButton.Tag = listing.id;
                             addToFavoritesButton.Click += (sender, e) => AddToFavoritesButton_Click(sender, e, addToFavoritesButton);
                             contentPanel.Controls.Add(addToFavoritesButton, 0, 6);
 
                             // Initialize the reservation button
-                            reservationButton = new Button();
+                            BunifuThinButton2 reservationButton = new BunifuThinButton2();
                             reservationButton.Width = 270;
-                            reservationButton.Text = "Make Reservation";
+                            reservationButton.ButtonText = "Make Reservation";
+                            reservationButton.IdleLineColor = Color.DeepPink;
+                            reservationButton.IdleForecolor = Color.DeepPink;
+                            reservationButton.IdleFillColor = Color.White;
+
+                            reservationButton.ActiveLineColor = Color.DeepPink;
+                            reservationButton.ActiveForecolor = Color.White;
+                            reservationButton.ActiveFillColor = Color.DeepPink;
                             reservationButton.Location = new System.Drawing.Point(10, 70); // Adjust the location as needed
-                            reservationButton.Click += (sender, e) => ReservationButton_Click(sender, e, addToFavoritesButton, listing);
+                            reservationButton.Click += (sender, e) => ReservationButton_Click(sender, e, listing, card, contentPanel);
                             contentPanel.Controls.Add(reservationButton, 0, 7);
 
 
@@ -615,6 +732,18 @@ namespace ProjectDesktop_app_Logement_
 
                             // Add the card to the FlowLayoutPanel
                             flowLayoutPanel1.Controls.Add(card);
+                            void Card_SizeChanged(object sender, EventArgs e)
+                            {
+
+
+                                // Adjust the size of the PictureBox based on the card's size
+                                int pictureBoxWidth = card.Width; // Subtract the left and right margins
+                                int pictureBoxHeight = card.Height / 3; // Adjust the ratio as needed
+
+                                pictureBox.Size = new System.Drawing.Size(pictureBoxWidth, pictureBoxHeight);
+                            }
+                            // Adjust the height of the card based on the last control's bottom position
+                           
                         }
                     }
                     // Process the response object as needed
@@ -906,7 +1035,7 @@ namespace ProjectDesktop_app_Logement_
 
         private void flowLayoutPanel1_Paint_1(object sender, PaintEventArgs e)
         {
-
+            
         }
 
         private void flowLayoutPanel2_Paint_1(object sender, PaintEventArgs e)
@@ -916,7 +1045,7 @@ namespace ProjectDesktop_app_Logement_
 
         private void label3_Click(object sender, EventArgs e)
         {
-            Form5 form3 = new Form5();
+            Form5 form3 = new Form5(result);
             Hide();
             form3.Show();
         }
@@ -931,11 +1060,188 @@ namespace ProjectDesktop_app_Logement_
             await PopulateListings2();
         }
 
-        
+
+        private BunifuCards FindParentBunifuCards(Control control)
+        {
+            Control parent = control.Parent;
+
+            while (parent != null)
+            {
+                if (parent is BunifuCards bunifuCards)
+                {
+                    return bunifuCards;
+                }
+
+                parent = parent.Parent;
+            }
+
+            return null; // Return null if parent BunifuCards control is not found
+        }
 
 
+        private void ReservationButton_Click(object sender, EventArgs e,Listing listing, Bunifu.Framework.UI.BunifuCards parentCard, TableLayoutPanel contentPanel)
+        {
+            parentCard.Size = new System.Drawing.Size(700, 550);
+            BunifuThinButton2 reservationButton = (BunifuThinButton2)sender;
+            
+            contentPanel.Controls.Remove(reservationButton);
 
-        private async static void AddToFavoritesButton_Click(object sender, EventArgs e, Button addToFavoritesButton)
+            Label Label = new Label();
+            Label.Text = "Date de Début de Réservation"; // Format the price
+            Label.AutoSize = true; // Adjust width based on content
+            Label.Font = new Font("Yu Gothic UI", 10, FontStyle.Bold); // Set the font
+           
+           
+
+            Label Label2 = new Label();
+            Label2.Text = "Date de Fin de Réservation"; // Format the price
+            Label2.AutoSize = true; // Adjust width based on content
+            Label2.Font = new Font("Yu Gothic UI", 10, FontStyle.Bold); // Set the font
+           
+            
+
+
+            // Clear the flow layout panel
+            flowLayoutPanel1.Controls.Clear();
+
+            // Add the parent card to the flow layout panel
+            flowLayoutPanel1.Controls.Add(parentCard);
+
+            // Create the TextBox controls for start and end dates
+            Guna2TextBox startDateTextBox = new Guna2TextBox();
+            Guna2TextBox endDateTextBox = new Guna2TextBox();
+
+            // Set the properties of the TextBox controls
+            startDateTextBox.Name = "startDateTextBox";
+            startDateTextBox.Width = 200;
+
+            endDateTextBox.Name = "endDateTextBox";
+            endDateTextBox.Width = 200;
+
+            // Attach event handlers to the TextBox controls' LostFocus events
+            startDateTextBox.LostFocus += DateTextBox_LostFocus;
+            endDateTextBox.LostFocus += DateTextBox_LostFocus;
+
+            // Set the placeholder text
+            string placeholder = "yyyy-MM-ddTHH:mm:ss.fffzzz";
+
+            // Set the initial text and color
+            startDateTextBox.Tag = placeholder;
+            startDateTextBox.ForeColor = System.Drawing.SystemColors.GrayText;
+
+            endDateTextBox.Tag = placeholder;
+            endDateTextBox.ForeColor = System.Drawing.SystemColors.GrayText;
+
+            // Attach the Enter and Leave event handlers
+            startDateTextBox.Enter += TextBoxDate_Enter;
+            startDateTextBox.Leave += TextBoxDate_Leave;
+
+            endDateTextBox.Enter += TextBoxDate_Enter;
+            endDateTextBox.Leave += TextBoxDate_Leave;
+
+            // Add the TextBox controls to the parent card
+            contentPanel.Controls.Add(Label, 0, 7);
+            contentPanel.Controls.Add(startDateTextBox, 0, 8);
+            contentPanel.Controls.Add(Label2, 0, 9);
+            contentPanel.Controls.Add(endDateTextBox,0,10);
+
+            // Create the add reservation button
+            BunifuThinButton2 addReservationButton = new BunifuThinButton2();
+           
+            addReservationButton.ButtonText = "Confirmer Reservation";
+            addReservationButton.Width = 300;
+            addReservationButton.IdleLineColor = Color.DeepPink;
+            addReservationButton.IdleForecolor = Color.DeepPink;
+            addReservationButton.IdleFillColor = Color.White;
+
+            addReservationButton.ActiveLineColor = Color.White;
+            addReservationButton.ActiveForecolor = Color.White;
+            addReservationButton.ActiveFillColor = Color.DeepPink;
+            addReservationButton.Location = new System.Drawing.Point(10, 40);
+            addReservationButton.Click += (addSender, addEvent) => Button1_Click(addSender, addEvent,listing, startDateTextBox, endDateTextBox);
+
+            // Add the add reservation button to the parent card
+            contentPanel.Controls.Add(addReservationButton,0,11);
+
+            parentCard.Height = addReservationButton.Bottom + 10;
+        }
+
+        private async void Button1_Click(object sender, EventArgs e,Listing listing, Guna2TextBox startDate, Guna2TextBox endDate)
+        {
+            // Handle the button click event here
+            // You can perform actions or write code that will be executed when the button is clicked
+            var payload = new
+            {
+                id = "string",
+                userId = "string",
+                listingId = listing.id,
+                startDate = startDate.Text,
+                endDate = endDate.Text,
+                totalPrice = 0,
+                createdAt = DateTime.UtcNow
+            };
+
+            var basePath = "C:/Users/HP/source/repos/ProjectDesktop_app(Logement)/ProjectDesktop_app(Logement)/";
+            var configuration = new ConfigurationBuilder()
+    .SetBasePath(basePath)
+    .AddJsonFile("appsettings.json")
+    .Build();
+
+            // Retrieve the Jwt:Secret value from configuration
+            var jwtSecret = configuration["Jwt:Secret"];
+
+            // Use jwtSecret in your code
+            var key = Encoding.ASCII.GetBytes(jwtSecret);
+
+            string tokenJson = result;
+            JObject tokenObject = JObject.Parse(tokenJson);
+            string jwtToken = tokenObject.Value<string>("token");
+
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = tokenHandler.ReadJwtToken(jwtToken);
+
+            // Convert the Reservation object to JSON
+            string json = JsonConvert.SerializeObject(payload);
+
+            // Set the base address of the API
+            string apiBaseUrl = "https://localhost:7194/Reservation";
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+                // Set the API endpoint URL
+                string apiUrl = apiBaseUrl ;
+
+                // Create a StringContent object with the JSON data
+                StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                try
+                {
+                    // Send a POST request to the API endpoint
+                    HttpResponseMessage response = await client.PostAsync(apiUrl, content);
+
+                    // Check if the request was successful
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Reservation réussie!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        string errorMessage = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine(errorMessage);
+                        Console.Write(errorMessage);
+                        MessageBox.Show("Failed to add offer. Error: " + errorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("An error occurred: " + ex.Message);
+                }
+            }
+        }
+
+        private async static void AddToFavoritesButton_Click(object sender, EventArgs e, BunifuThinButton2 addToFavoritesButton)
         {
             // Get the selected listing ID
             JObject listingId = (JObject)addToFavoritesButton.Tag; // Replace with your logic to get the listing ID
@@ -952,7 +1258,7 @@ namespace ProjectDesktop_app_Logement_
             Listing listing = new Listing
             {
                 id = listingId,
-               
+
             };
 
             // Convert the Listing object to JSON
@@ -973,176 +1279,20 @@ namespace ProjectDesktop_app_Logement_
             {
                 Console.WriteLine("Failed to add listing to favorites. Error: " + response.StatusCode);
             }
-        
 
-        // Update the button appearance
-        addToFavoritesButton.BackColor = Color.DeepPink;
-        addToFavoritesButton.ForeColor = Color.White;
-        addToFavoritesButton.Text = "Favorie";
+
+            // Update the button appearance
+            addToFavoritesButton.IdleFillColor = Color.DeepPink;
+            addToFavoritesButton.IdleForecolor = Color.White;
+            addToFavoritesButton.ButtonText = "Favorie";
         }
 
-        // Event handler for the reservation button click event
-        private void ReservationButton_Click(object sender, EventArgs e, Button addToFavoritesButton, Listing listing)
-        {
-            Listing listing1 = new Listing();
-            listing1 = listing;
-            // Clear the flow layout panel
-            flowLayoutPanel1.Controls.Clear();
-            Button button = (Button)sender; // Cast the sender object to a Button
-                                            // Get the parent BunifuCards control
-
-            // Access and modify properties of the parent card
-
-            Control parentControl = button.Parent;
-            BunifuCards parentCard = null;
-
-            while (parentControl != null)
-            {
-                if (parentControl is BunifuCards)
-                {
-                    parentCard = (BunifuCards)parentControl;
-                    break;
-                }
-
-                parentControl = parentControl.Parent;
-            }
-
-            // Check if the parentCard is found
-            if (parentCard != null)
-            {
-               
-                parentCard.Size = new System.Drawing.Size(1063, 691);
-                Button button1 = parentCard.Controls.Find("addToFavoritesButton", true).FirstOrDefault() as Button;
-
-                // Make the parentCard fill its parent container
-
-                // Example of making all elements within the parentCard fill the available space
-                foreach (Control control in parentCard.Controls)
-                {
-                    //control.Size = new System.Drawing.Size(500, 500);// Set the Dock property of each control to Fill
-                }
 
 
-
-                flowLayoutPanel1.Controls.Add(parentCard);
-
-                // Get the selected listing ID
-
-
-                TextBox startDateTextBox = new TextBox();
-                TextBox endDateTextBox = new TextBox();
-
-                // Set the properties of the TextBox controls
-                startDateTextBox.Name = "startDateTextBox";
-                startDateTextBox.Width = 200;
-
-                endDateTextBox.Name = "endDateTextBox";
-                endDateTextBox.Width = 200;
-
-
-
-                // Attach event handlers to the TextBox controls' LostFocus events
-                startDateTextBox.LostFocus += DateTextBox_LostFocus;
-                endDateTextBox.LostFocus += DateTextBox_LostFocus;
-                // Assuming you have a TextBox named textBoxDate
-
-                // Set the placeholder text
-                string placeholder = "yyyy-MM-ddTHH:mm:ss.fffzzz";
-
-                // Set the initial text and color
-                startDateTextBox.Text = placeholder;
-                startDateTextBox.ForeColor = System.Drawing.SystemColors.GrayText;
-
-                endDateTextBox.Text = placeholder;
-                endDateTextBox.ForeColor = System.Drawing.SystemColors.GrayText;
-
-                // Attach the Enter and Leave event handlers
-                startDateTextBox.Enter += TextBoxDate_Enter;
-                startDateTextBox.Leave += TextBoxDate_Leave;
-
-                endDateTextBox.Enter += TextBoxDate_Enter;
-                endDateTextBox.Leave += TextBoxDate_Leave;
-                // Add the TextBox controls to the panel
-                parentCard.Controls.Add(startDateTextBox);
-                parentCard.Controls.Add(endDateTextBox);
-                if (listing != null && startDateTextBox != null && endDateTextBox != null)
-                {
-                    // Attach the event handler to the button
-                    if (button1 != null)
-                    {
-                        button1.Click += (btnSender, btnEvent) => Button1_Click(btnSender, btnEvent, listing, startDateTextBox, endDateTextBox);
-                        parentCard.Controls.Add(button1);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Button1 not found!");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("One or more objects are null!");
-                }
-
-
-
-
-            }
-        }
-
-            private static async void Button1_Click(object sender, EventArgs e,Listing listing,TextBox startDate,TextBox endDate)
-        {
-            // Handle the button click event here
-            // You can perform actions or write code that will be executed when the button is clicked
-            var payload = new
-            {
-                id = "string",
-                userId = "string",
-                listingId = listing.id,
-                startDate = startDate.Text,
-                endDate = endDate.Text,
-                totalPrice = 0,
-                createdAt = DateTime.UtcNow
-            };
-
-            // Convert the Reservation object to JSON
-            string json = JsonConvert.SerializeObject(payload);
-
-            // Set the base address of the API
-            string apiBaseUrl = "https://localhost:7194/";
-
-            using (HttpClient client = new HttpClient())
-            {
-                // Set the API endpoint URL
-                string apiUrl = apiBaseUrl + "Reservation";
-
-                // Create a StringContent object with the JSON data
-                StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                try
-                {
-                    // Send a POST request to the API endpoint
-                    HttpResponseMessage response = await client.PostAsync(apiUrl, content);
-
-                    // Check if the request was successful
-                    if (response.IsSuccessStatusCode)
-                    {
-                        Console.WriteLine("Reservation added successfully.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Failed to add reservation. Error: " + response.StatusCode);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("An error occurred: " + ex.Message);
-                }
-            }
-        }
 
         private static void TextBoxDate_Leave(object sender, EventArgs e)
         {
-            TextBox textBox = (TextBox)sender;
+            Guna2TextBox textBox = (Guna2TextBox)sender;
 
             // Check if the current text is empty
             if (string.IsNullOrWhiteSpace(textBox.Text))
@@ -1155,7 +1305,7 @@ namespace ProjectDesktop_app_Logement_
 
         private static void TextBoxDate_Enter(object sender, EventArgs e)
         {
-            TextBox textBox = (TextBox)sender;
+            Guna2TextBox textBox = (Guna2TextBox)sender;
 
             // Check if the current text is the placeholder
             if (textBox.Text == textBox.Tag.ToString())
@@ -1168,7 +1318,7 @@ namespace ProjectDesktop_app_Logement_
 
         private static void DateTextBox_LostFocus(object sender, EventArgs e)
         {
-            TextBox textBox = (TextBox)sender;
+            Guna2TextBox textBox = (Guna2TextBox)sender;
 
             // Parse the date entered in the TextBox
             if (DateTime.TryParse(textBox.Text, out DateTime selectedDate))

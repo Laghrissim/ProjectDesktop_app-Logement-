@@ -14,18 +14,44 @@ using GMap.NET.WindowsForms;
 using GMap.NET.WindowsForms.Markers;
 using Bunifu.Framework.UI;
 using System.Net.Http;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
+using System.Configuration;
+using System.IO;
+using System.Reflection;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
+using MongoDB.Bson;
 
 namespace ProjectDesktop_app_Logement_
 {
    
     public partial class Form5 : Form
 
-    {
+    {   private readonly IConfiguration _configuration;
         private string selectedImagePath = "C:/Users/HP/OneDrive/Bureau/Videos .Net/imagescrypto/big-house-13.png";
+        private string token;
         public Form5()
         {
             InitializeComponent();
+
         }
+        public Form5(string token)
+        {
+            InitializeComponent();
+            this.token = token;
+        }
+
+
+
+
+
+
+
+
+
 
         private void guna2PictureBox1_Click(object sender, EventArgs e)
         {
@@ -144,31 +170,78 @@ namespace ProjectDesktop_app_Logement_
         {
             // Get the input values
 
-            string title = guna2TextBox1.Text;
-            string description = guna2TextBox2.Text;
-            string category = GetSelectedDropdownItem(bunifuDropdown1);
-            string prix = guna2TextBox3.Text;
-            string roomCount = GetSelectedDropdownItem(bunifuDropdown2);
-            string bathroomCount = GetSelectedDropdownItem(bunifuDropdown3);
-            string guestCount = GetSelectedDropdownItem(bunifuDropdown4);
+            string titleText = guna2TextBox1.Text;
+            string descriptionText = guna2TextBox2.Text;
+            string categoryText = bunifuDropdown1.selectedValue.ToString();
+            int prixText = int.Parse( guna2TextBox3.Text);
+            string roomCount = bunifuDropdown2.selectedValue.ToString();
+            string bathroomCount = bunifuDropdown3.selectedValue.ToString();
+            string guestCount = bunifuDropdown4.selectedValue.ToString();
             // Replace with the actual path
-            string location = guna2TextBox4.Text;
+            string locationText = guna2TextBox4.Text;
+            
+
+            int roomCountText;
+            int bathroomCountText;
+            int guestCountText;
+
+            // Method 1: Using int.Parse()
+            bool roomCountSuccess = int.TryParse(roomCount, out roomCountText);
+            bool bathroomCountSuccess = int.TryParse(bathroomCount, out bathroomCountText);
+            bool guestCountSuccess = int.TryParse(guestCount, out guestCountText);
+
+           
+            var basePath = "C:/Users/HP/source/repos/ProjectDesktop_app(Logement)/ProjectDesktop_app(Logement)/";
+            // Inject IConfiguration into your class or retrieve it from the DI container
+            var configuration = new ConfigurationBuilder()
+      .SetBasePath(basePath)
+      .AddJsonFile("appsettings.json")
+      .Build();
+
+            // Retrieve the Jwt:Secret value from configuration
+            var jwtSecret = configuration["Jwt:Secret"];
+
+            // Use jwtSecret in your code
+            var key = Encoding.ASCII.GetBytes(jwtSecret);
+
+            string tokenJson = token;
+            JObject tokenObject = JObject.Parse(tokenJson);
+            string jwtToken = tokenObject.Value<string>("token");
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = tokenHandler.ReadJwtToken(jwtToken);
+            var userIdText = jwtSecurityToken.Claims.FirstOrDefault(c => c.Type == "unique_name")?.Value;
+            ObjectId userIdValue;
+            bool parseSuccess = ObjectId.TryParse(userIdText, out userIdValue);
+
+            if (!parseSuccess)
+            {
+                // Handle the case where the parsing fails
+                MessageBox.Show("Failed to parse userIdText as ObjectId.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return; // or handle the error accordingly
+            }
+
 
             // Create the request payload as an anonymous object
             var payload = new
             {
-                title = title,
-                description = description,
+                
+                title = titleText,
+                description = descriptionText,
                 imageSrc = selectedImagePath,
                 createdAt = DateTime.Now,
-                category = category,
-                bathroomCount = bathroomCount,
-                roomCount = roomCount,
-                guestCount = guestCount,
-                locationValue = "string", // Replace with the actual location value
-                userId = new { timestamp = 0 }, // Replace with the actual user ID
-                price = prix
+                category = categoryText,
+                bathroomCount = bathroomCountText,
+                roomCount = roomCountText,
+                guestCount = guestCountText,
+                locationValue = locationText, // Replace with the actual location value
+                // Replace with the actual user ID
+                price = prixText,
+                
             };
+
+
+
 
             // Serialize the payload to a JSON string
             string jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
@@ -178,6 +251,8 @@ namespace ProjectDesktop_app_Logement_
             {
                 // Define the API endpoint URL
                 string url = "https://localhost:7194/Listings";
+
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
 
                 // Create a new StringContent object with the JSON string and the "application/json" media type
                 var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
@@ -192,14 +267,18 @@ namespace ProjectDesktop_app_Logement_
                     {
                         // Offer added successfully
                         // You can handle the success case here
-                        Console.WriteLine("Offer added successfully!");
+                        MessageBox.Show("Ajout réussie!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
                         // Offer addition failed
                         // You can handle the failure case here
-                        Console.WriteLine("Failed to add offer. Error: " + response.StatusCode);
+                        string errorMessage = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine(errorMessage);
+                        Console.Write(errorMessage);
+                        MessageBox.Show("Failed to add offer. Error: " + errorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+                
                 }
                 catch (Exception ex)
                 {
@@ -234,6 +313,11 @@ namespace ProjectDesktop_app_Logement_
                 selectedImagePath = openFileDialog.FileName;
                 guna2PictureBox1.Image = Image.FromFile(selectedImagePath);
             }
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
    }
